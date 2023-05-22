@@ -33,10 +33,9 @@ class MovieController extends Controller
      */
     public function search(Request $request)
     {
-        $searchQuery = "SELECT * FROM movies WHERE movies.title LIKE '%" . $request->input('searchParam') . "%' LIMIT 100;";
+        $movies = Movie::with(['reviews'])->where('title', 'LIKE', '%'.$request->input('searchParam').'%')->paginate(25);
 
-        $results = DB::select($searchQuery);
-        return $results;
+        return MovieResource::collection($movies);
     }
 
     /**
