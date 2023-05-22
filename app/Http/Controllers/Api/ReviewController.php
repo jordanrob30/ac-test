@@ -8,6 +8,7 @@ use App\Http\Resources\ReviewResource;
 use Illuminate\Http\Request;
 
 use App\Models\Review;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ReviewController extends Controller
 {
@@ -54,11 +55,11 @@ class ReviewController extends Controller
     }
 
     /**
-     * Return 5 most recent resources
+     * @return AnonymousResourceCollection
      */
-    public function recent()
+    public function recent(): AnonymousResourceCollection
     {
-        $reviews = Review::orderBy('created_at', 'desc')->limit(5)->get();
-        return response()->json(['reviews' => $reviews]);
+        $reviews = Review::with('movie', 'movie.reviews')->orderBy('created_at', 'desc')->limit(5)->get();
+        return ReviewResource::collection($reviews);
     }
 }

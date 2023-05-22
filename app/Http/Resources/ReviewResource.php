@@ -18,6 +18,7 @@ class ReviewResource extends JsonResource
             'id'     => $this->id,
             'review' => $this->review,
             'rating' => $this->rating,
+            'movie'  => MovieResource::make($this->whenLoaded('movie')),
         ];
     }
 }
