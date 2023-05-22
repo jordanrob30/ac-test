@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\MovieResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -31,9 +32,10 @@ class MovieController extends Controller
     /**
      * Search for a resource with a matching attribute
      */
-    public function search(Request $request)
+    public function search(Request $request): AnonymousResourceCollection
     {
-        $movies = Movie::with(['reviews'])->where('title', 'LIKE', '%'.$request->input('searchParam').'%')->paginate(25);
+        $movies = Movie::with(['reviews'])->where('title', 'LIKE', '%'.$request->input('searchParam').'%')
+            ->paginate(5);
 
         return MovieResource::collection($movies);
     }
