@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('/movies/search', [MovieController::class, 'search']);
     Route::get('/movies/recent', [MovieController::class, 'recent']);
     Route::get('/movies/{id}', [MovieController::class, 'show']);
+    Route::post('/movies/upload', [MovieController::class, 'upload']);
 
     //View all reviews (owned only), edit a reviews (owned only), delete a reviews (owned only)
     Route::get('/reviews/recent', [ReviewController::class, 'recent']);

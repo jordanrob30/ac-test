@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\UploadMoviesRequest;
 use App\Http\Resources\MovieResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Movie;
@@ -12,25 +14,29 @@ use App\Models\Movie;
 class MovieController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @return AnonymousResourceCollection
      */
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
-        $movies = Movie::get();
-        return response()->json(['data' => ['movies' => $movies]], 200);
+        return MovieResource::collection(Movie::with(['reviews'])->paginate(5));
     }
 
     /**
-     * Display the specified resource.
+     * @param string $id
+     *
+     * @return JsonResponse
      */
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         $movie = Movie::where('id', $id)->with('reviews')->withCount('reviews')->first();
+
         return response()->json(['movie' => MovieResource::make($movie)]);
     }
 
     /**
-     * Search for a resource with a matching attribute
+     * @param Request $request
+     *
+     * @return AnonymousResourceCollection
      */
     public function search(Request $request): AnonymousResourceCollection
     {
@@ -41,11 +47,54 @@ class MovieController extends Controller
     }
 
     /**
-     * Return 5 most recent resources
+     * @return JsonResponse
      */
-    public function recent()
+    public function recent(): JsonResponse
     {
         $movies = Movie::with('reviews')->orderBy('created_at', 'desc')->limit(5)->get();
+
         return response()->json(['movies' => MovieResource::collection($movies)]);
+    }
+
+    /**
+     * @param UploadMoviesRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function upload(UploadMoviesRequest $request): JsonResponse
+    {
+        $file = $request->file('file');
+        $handle = fopen($file->getRealPath(), 'r');
+        $header = fgetcsv($handle);
+
+        while (!feof($handle)) {
+            $rows = [];
+            for ($i = 0; $i < 1000; $i++) { //Was running into memory issues so lets chunk it by 1000 at a time
+                $row = fgetcsv($handle);
+                if ($row !== false) {
+                    $rows[] = $row;
+                } else {
+                    break;
+                }
+            }
+
+            $chunkMovies = [];
+            foreach ($rows as $row) {
+                $chunkMovies[] = array_combine($header, $row);
+            }
+
+            foreach ($chunkMovies as $movieData) {
+                Movie::create([
+                    'title'        => $movieData['title'],
+                    'overview'     => $movieData['overview'],
+                    'release_date' => $movieData['release_date'],
+                    'tagline'      => $movieData['tagline'],
+                ]);
+            }
+        }
+
+        fclose($handle);
+
+        return response()->json(['message' => 'Upload Successful']);
     }
 }

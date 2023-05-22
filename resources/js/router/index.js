@@ -4,6 +4,7 @@ import Dashboard from '../pages/Dashboard.vue';
 import Search from '../pages/Search.vue';
 import Login from '../pages/Login.vue';
 import Movie from "../pages/Movie.vue";
+import Upload from "../pages/admin/Upload.vue";
 import {useTokenStore} from "../store/auth";
 
 const routes = [
@@ -26,6 +27,11 @@ const routes = [
         path: "/search",
         name: "Search",
         component: Search
+    },
+    {
+        path: "/admin/movies",
+        name: "Upload",
+        component: Upload
     }
 ];
 
