@@ -3,38 +3,51 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\MovieCSVUploadJob;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Bus;
+use App\Http\Requests\UploadMoviesRequest;
+use App\Models\Movie;
+use Illuminate\Http\JsonResponse;
 
 class MoviesController extends Controller
 {
-    public function index()
+    /**
+     * @param UploadMoviesRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function upload(UploadMoviesRequest $request): JsonResponse
     {
-        return view('admin.movies.index');
-    }
+        $file = $request->file('file');
+        $handle = fopen($file->getRealPath(), 'r');
+        $header = fgetcsv($handle);
 
-    public function import(Request $request)
-    {
-       
-
-            $csv = fopen(public_path('/uploads/movies-trimmed.csv'),'r');
-            $csv = fgetcsv($csv);
-            $chunks = array_chunk($csv, 1000);
-            $header = [];
-            $batch = Bus::batch([])->dispatch();
-
-            foreach($chunks as $key => $chunk) {
-                $data = array_map('str_getcsv', $chunk);
-                if($key === 0) {
-                    $header = $data[0];
-                    unset($data[0]);
+        while (!feof($handle)) {
+            $rows = [];
+            for ($i = 0; $i < 1000; $i++) { //Was running into memory issues so lets chunk it by 1000 at a time
+                $row = fgetcsv($handle);
+                if ($row !== false) {
+                    $rows[] = $row;
+                } else {
+                    break;
                 }
-                $batch->add(new MovieCSVUploadJob($data, $header));
             }
-            return $batch;
-        
-        
-    }
 
+            $chunkMovies = [];
+            foreach ($rows as $row) {
+                $chunkMovies[] = array_combine($header, $row);
+            }
+
+            foreach ($chunkMovies as $movieData) {
+                Movie::create([
+                    'title'        => $movieData['title'],
+                    'overview'     => $movieData['overview'],
+                    'release_date' => $movieData['release_date'],
+                    'tagline'      => $movieData['tagline'],
+                ]);
+            }
+        }
+
+        fclose($handle);
+
+        return response()->json(['message' => 'Upload Successful']);
+    }
 }
