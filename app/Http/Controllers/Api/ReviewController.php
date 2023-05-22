@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpsertReviewRequest;
+use App\Http\Resources\ReviewResource;
 use Illuminate\Http\Request;
 
 use App\Models\Review;
@@ -18,33 +20,19 @@ class ReviewController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * @param UpsertReviewRequest $request
+     *
+     * @return ReviewResource
      */
-    public function create()
+    public function store(UpsertReviewRequest $request): ReviewResource
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-
+        return ReviewResource::make(Review::create($request->validated()));
     }
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
     {
         //
     }

@@ -4,6 +4,7 @@ import Dashboard from '../pages/Dashboard.vue';
 import Search from '../pages/Search.vue';
 import Login from '../pages/Login.vue';
 import Movie from "../pages/Movie.vue";
+import {useTokenStore} from "../store/auth";
 
 const routes = [
     {
@@ -31,6 +32,17 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes
+});
+
+router.beforeEach((to, from, next) => {
+    const tokenStore = useTokenStore();
+    const token = tokenStore.getToken;
+
+    if (to.name !== 'Login' && (!token)) {
+        next({ name: 'Login' });
+    } else {
+        next();
+    }
 });
 
 export default router;

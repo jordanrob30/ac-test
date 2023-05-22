@@ -18,19 +18,26 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import {useTokenStore} from "../store/auth";
 
 
 const auth = ref({email: "", password: ""});
 const router = useRouter();
 const errorMessage = ref('');
 const processing = ref(false);
-
+const tokenStore = useTokenStore()
 
 const login = async () => {
     processing.value = true;
     try {
         const {data} = await axios.post('/api/login', auth.value);
-        router.push({name: 'Dashboard'});
+
+        if(data.status) {
+          tokenStore.setToken(data.token)
+          router.push({name: 'Dashboard'});
+        } else {
+          //todo show errors
+        }
     } catch(error) {
         const { response } = error;
         console.log(response, "RESPONSE");

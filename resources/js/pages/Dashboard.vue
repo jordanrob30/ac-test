@@ -5,7 +5,7 @@
                 Recent 
                 <span class="bg-gradient-to-br from-sky-500 to-cyan-400 bg-clip-text text-transparent">Movies</span>
             </div>
-            <Movie v-for="movie in recentMovies" :key="movie.id" :title="movie.title" :tagline="movie.tagline" :id="movie.id" :numOfReviews="movie.review_count"/>
+            <Movie v-for="movie in recentMovies" :key="movie.id" :title="movie.title" :tagline="movie.tagline" :id="movie.id" :numOfReviews="movie.reviews.length" :average="movie.reviews_avg"/>
         </div>
 
         <div class="mx-auto max-w-screen-lg px-3 py-6">

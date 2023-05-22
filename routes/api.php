@@ -35,10 +35,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::get('/movies/{id}', [MovieController::class, 'show']);
 
     //View all reviews (owned only), edit a reviews (owned only), delete a reviews (owned only)
-    Route::get('/reviews/:movieId', [ReviewController::class, 'index']);
-    Route::post('/reviews', [ReviewController::class, 'store']);
-    Route::patch('/reviews/:id', [ReviewController::class, 'update']);
-    Route::delete('/reviews/:id', [ReviewController::class, 'destroy']);
+    Route::resource('reviews', ReviewController::class)->except(['create', 'edit']);
     Route::get('/reviews/recent', [ReviewController::class, 'recent']);
     
 });

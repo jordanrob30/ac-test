@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\MovieResource;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -23,9 +24,8 @@ class MovieController extends Controller
      */
     public function show(string $id)
     {
-
         $movie = Movie::where('id', $id)->with('reviews')->withCount('reviews')->first();
-        return response()->json(['movie' => $movie], 200);
+        return response()->json(['movie' => MovieResource::make($movie)]);
     }
 
     /**
@@ -44,7 +44,7 @@ class MovieController extends Controller
      */
     public function recent()
     {
-        $movies = Movie::orderBy('created_at', 'desc')->limit(5)->get();
-        return response()->json(['movies' => $movies], 200);
+        $movies = Movie::with('reviews')->orderBy('created_at', 'desc')->limit(5)->get();
+        return response()->json(['movies' => MovieResource::collection($movies)]);
     }
 }
