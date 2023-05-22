@@ -36,6 +36,7 @@
 
 <script setup>
 import {ref} from "vue";
+import {useRoute} from "vue-router";
 
 const props = defineProps({
   modalOpen: Boolean,
@@ -44,11 +45,12 @@ const props = defineProps({
 
 const emits = defineEmits(['close-modal', 'review-created']);
 const possibleRating =ref(null)
+const route = useRoute()
 
 const review = ref({
   review: '',
   rating: 3,
-  movie_id: props.movieId
+  movie_id: route.params.id
 })
 
 const ratings = [1,2,3,4,5]
